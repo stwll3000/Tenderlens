@@ -33,14 +33,15 @@ def load_data() -> pd.DataFrame:
     """Загрузка данных из JSON файла."""
     data_dir = Path(__file__).parent.parent / "data"
     
-    # Ищем файлы с данными (приоритет: enriched > multi_regions > fast > all)
-    enriched_files = sorted(data_dir.glob("lots_enriched_*.json"), reverse=True)
+    # Ищем файлы с данными (приоритет: multi_regions > enriched > fast > all)
+    # Приоритет большим датасетам для лучшей аналитики
     multi_files = sorted(data_dir.glob("lots_multi_regions_*.json"), reverse=True)
-    all_files = sorted(data_dir.glob("lots_all_*.json"), reverse=True)
+    enriched_files = sorted(data_dir.glob("lots_enriched_*.json"), reverse=True)
     fast_files = sorted(data_dir.glob("lots_fast_*.json"), reverse=True)
+    all_files = sorted(data_dir.glob("lots_all_*.json"), reverse=True)
     
-    # Выбираем файл (приоритет обогащённым данным)
-    json_files = enriched_files or multi_files or fast_files or all_files
+    # Выбираем файл (приоритет большим датасетам)
+    json_files = multi_files or fast_files or all_files or enriched_files
     
     if not json_files:
         st.error("Файлы с данными не найдены в директории data/")
