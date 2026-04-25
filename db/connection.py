@@ -31,13 +31,16 @@ if not DATABASE_URL:
         "Добавьте строку подключения к PostgreSQL."
     )
 
-# Создание engine с connection pooling
-# Для Supabase pooler используем минимальные настройки
+# Создание engine для Supabase Transaction Pooler
+# Transaction pooler работает в режиме pgbouncer transaction mode
 engine = create_engine(
     DATABASE_URL,
-    poolclass=NullPool,
+    poolclass=NullPool,  # Не используем pool, т.к. pooler сам управляет
     echo=False,
-    pool_pre_ping=False,  # Отключаем pre-ping
+    connect_args={
+        "connect_timeout": 10,
+        "options": "-c statement_timeout=30000",  # 30 секунд на запрос
+    }
 )
 
 # Создание фабрики сессий
@@ -112,15 +115,11 @@ def test_connection() -> bool:
         bool: True если подключение успешно
     """
     try:
-        # Используем прямое подключение через psycopg2 для проверки
-        import psycopg2
-        conn = psycopg2.connect(DATABASE_URL)
-        cur = conn.cursor()
-        cur.execute("SELECT 1")
-        cur.fetchone()
-        cur.close()
-        conn.close()
-        logger.info("✓ Подключение к БД успешно")
+        # Используем SQLAlchemy engine для проверки
+        with engine.connect() as conn:
+            result = conn.execute("SELECT version()")
+            version = result.fetchone()[0]
+            logger.info(f"✓ Подключение к БД успешно: {version}")
         return True
     except Exception as e:
         logger.error(f"✗ Ошибка подключения к БД: {e}")

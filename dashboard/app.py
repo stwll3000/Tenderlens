@@ -16,7 +16,7 @@ from datetime import datetime
 # Добавляем корневую директорию в путь для импорта модулей
 sys.path.append(str(Path(__file__).parent.parent))
 
-from analytics import pricing, competition
+from analytics import pricing, competition, temporal
 
 
 # Конфигурация страницы
@@ -33,13 +33,14 @@ def load_data() -> pd.DataFrame:
     """Загрузка данных из JSON файла."""
     data_dir = Path(__file__).parent.parent / "data"
     
-    # Ищем последний файл с данными (приоритет multi_regions)
+    # Ищем файлы с данными (приоритет: enriched > multi_regions > fast > all)
+    enriched_files = sorted(data_dir.glob("lots_enriched_*.json"), reverse=True)
     multi_files = sorted(data_dir.glob("lots_multi_regions_*.json"), reverse=True)
     all_files = sorted(data_dir.glob("lots_all_*.json"), reverse=True)
     fast_files = sorted(data_dir.glob("lots_fast_*.json"), reverse=True)
     
-    # Выбираем самый большой файл
-    json_files = multi_files or fast_files or all_files
+    # Выбираем файл (приоритет обогащённым данным)
+    json_files = enriched_files or multi_files or fast_files or all_files
     
     if not json_files:
         st.error("Файлы с данными не найдены в директории data/")
@@ -47,7 +48,11 @@ def load_data() -> pd.DataFrame:
     
     latest_file = json_files[0]
     
-    st.sidebar.info(f"📁 Данные: {latest_file.name}")
+    # Показываем тип данных
+    if 'enriched' in latest_file.name:
+        st.sidebar.success(f"📁 Данные: {latest_file.name} (с датами)")
+    else:
+        st.sidebar.info(f"📁 Данные: {latest_file.name}")
     
     with open(latest_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -161,9 +166,10 @@ def main():
         )
     
     # Вкладки для разных разделов
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "💰 Анализ цен",
         "🏆 Конкуренция",
+        "⏰ Временной анализ",
         "📊 Распределения",
         "📋 Данные"
     ])
@@ -301,8 +307,114 @@ def main():
             )
             st.plotly_chart(fig_pie, use_container_width=True)
     
-    # Вкладка 3: Распределения
+    # Вкладка 3: Временной анализ
     with tab3:
+        st.subheader("⏰ Временной анализ закупок")
+        
+        # Проверяем наличие дат
+        has_dates = 'published_date' in filtered_df.columns and filtered_df['published_date'].notna().any()
+        
+        if not has_dates:
+            st.warning("⚠️ Временной анализ недоступен: данные не содержат информацию о датах размещения.")
+            st.info("💡 Запустите скрипт обогащения данных: `python scraper/enrich_100_lots.py`")
+        else:
+            # Анализ дедлайнов
+            st.markdown("### 📅 Анализ сроков подачи заявок")
+            
+            deadline_stats = temporal.analyze_deadline_distribution(filtered_df)
+            
+            if deadline_stats:
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Средний срок", f"{deadline_stats['mean']:.1f} дней")
+                with col2:
+                    st.metric("Медиана", f"{deadline_stats['median']:.0f} дней")
+                with col3:
+                    st.metric("Минимум", f"{deadline_stats['min']} дней")
+                with col4:
+                    st.metric("Максимум", f"{deadline_stats['max']} дней")
+                
+                # График распределения сроков
+                st.markdown("#### Распределение по срокам")
+                
+                dist_data = deadline_stats['distribution']
+                labels = list(dist_data.keys())
+                values = [dist_data[k]['count'] for k in labels]
+                
+                fig_deadline = px.bar(
+                    x=labels,
+                    y=values,
+                    title="Распределение лотов по срокам подачи заявок",
+                    labels={'x': 'Срок', 'y': 'Количество лотов'},
+                    color=values,
+                    color_continuous_scale='Blues'
+                )
+                fig_deadline.update_layout(showlegend=False)
+                st.plotly_chart(fig_deadline, use_container_width=True)
+            
+            # Анализ дат публикации
+            st.markdown("### 📆 Анализ дат размещения")
+            
+            pub_stats = temporal.analyze_publication_dates(filtered_df)
+            
+            if pub_stats:
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Период", f"{pub_stats['date_range']['days']} дней")
+                with col2:
+                    st.metric("Всего лотов", pub_stats['total_lots'])
+                with col3:
+                    st.metric("В среднем/день", f"{pub_stats['avg_per_day']:.1f}")
+                
+                # График по дням недели
+                st.markdown("#### Распределение по дням недели")
+                
+                weekday_data = pub_stats['by_weekday']
+                days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                days_ru = {
+                    'Monday': 'Понедельник',
+                    'Tuesday': 'Вторник',
+                    'Wednesday': 'Среда',
+                    'Thursday': 'Четверг',
+                    'Friday': 'Пятница',
+                    'Saturday': 'Суббота',
+                    'Sunday': 'Воскресенье'
+                }
+                
+                weekday_sorted = {day: weekday_data.get(day, 0) for day in days_order}
+                labels_ru = [days_ru[day] for day in weekday_sorted.keys()]
+                values = list(weekday_sorted.values())
+                
+                fig_weekday = px.bar(
+                    x=labels_ru,
+                    y=values,
+                    title="Количество размещений по дням недели",
+                    labels={'x': 'День недели', 'y': 'Количество лотов'},
+                    color=values,
+                    color_continuous_scale='Viridis'
+                )
+                fig_weekday.update_layout(showlegend=False)
+                st.plotly_chart(fig_weekday, use_container_width=True)
+                
+                # Временной ряд
+                st.markdown("#### Динамика размещения закупок")
+                
+                timeline = temporal.get_publication_timeline(filtered_df, freq='D')
+                
+                if len(timeline) > 0:
+                    fig_timeline = px.line(
+                        x=timeline.index,
+                        y=timeline.values,
+                        title="Количество размещений по дням",
+                        labels={'x': 'Дата', 'y': 'Количество лотов'}
+                    )
+                    fig_timeline.update_traces(line_color='#1f77b4')
+                    st.plotly_chart(fig_timeline, use_container_width=True)
+    
+    # Вкладка 4: Распределения
+    with tab4:
         st.subheader("Распределение закупок")
         
         col1, col2 = st.columns(2)
@@ -370,8 +482,8 @@ def main():
             
             st.plotly_chart(fig_regions, use_container_width=True)
     
-    # Вкладка 4: Таблица данных
-    with tab4:
+    # Вкладка 5: Данные
+    with tab5:
         st.subheader("Данные о закупках")
         
         # Выбор колонок для отображения
