@@ -48,6 +48,9 @@ def load_data() -> pd.DataFrame:
     df = pd.DataFrame(data)
     df['initial_price'] = pd.to_numeric(df['initial_price'], errors='coerce')
     
+    # Очистка данных
+    df = df.dropna(subset=['region_name', 'initial_price'])
+    
     return df
 
 
@@ -74,11 +77,13 @@ def main():
     st.sidebar.header("🔍 Фильтры")
     
     # Фильтр по регионам
-    regions = ["Все регионы"] + sorted(df['region_name'].unique().tolist())
+    unique_regions = df['region_name'].dropna().unique().tolist()
+    regions = ["Все регионы"] + sorted([str(r) for r in unique_regions])
     selected_region = st.sidebar.selectbox("Регион", regions)
     
     # Фильтр по законам
-    laws = ["Все законы"] + sorted(df['law'].unique().tolist())
+    unique_laws = df['law'].dropna().unique().tolist()
+    laws = ["Все законы"] + sorted([str(l) for l in unique_laws])
     selected_law = st.sidebar.selectbox("Закон", laws)
     
     # Фильтр по диапазону цен
@@ -94,7 +99,8 @@ def main():
     )
     
     # Фильтр по статусам
-    statuses = ["Все статусы"] + sorted(df['status'].unique().tolist())
+    unique_statuses = df['status'].dropna().unique().tolist()
+    statuses = ["Все статусы"] + sorted([str(s) for s in unique_statuses])
     selected_status = st.sidebar.selectbox("Статус закупки", statuses)
     
     # Применение фильтров
