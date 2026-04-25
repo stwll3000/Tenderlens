@@ -13,6 +13,8 @@ from datetime import datetime
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from pathlib import Path
 
+from scraper.regions import REGIONS_EXTENDED
+
 # Настройка логирования
 logging.basicConfig(
     level=logging.INFO,
@@ -31,12 +33,8 @@ class ZakupkiScraperEnhanced:
     BASE_URL = "https://zakupki.gov.ru"
     SEARCH_URL = f"{BASE_URL}/epz/order/extendedsearch/results.html"
     
-    # Коды регионов
-    REGIONS = {
-        "54": "Новосибирская область",
-        "77": "Москва",
-        "50": "Московская область"
-    }
+    # Используем расширенный список регионов
+    REGIONS = REGIONS_EXTENDED
     
     def __init__(self, delay_min: int = 2, delay_max: int = 5, fetch_details: bool = True):
         """
