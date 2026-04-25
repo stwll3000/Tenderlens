@@ -30,3 +30,6 @@ ipykernel==6.27.1
 
 # Тесты
 pytest==7.4.3
+
+# Telegram Bot
+python-telegram-bot==20.7
