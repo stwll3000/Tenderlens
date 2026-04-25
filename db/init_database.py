@@ -34,7 +34,7 @@ def main():
         from db.connection import test_connection
         
         if not test_connection():
-            print("\n❌ ОШИБКА: Не удалось подключиться к БД")
+            print("\n[ERROR] Не удалось подключиться к БД")
             print("\nПроверьте:")
             print("  1. Создан ли файл .env с DATABASE_URL")
             print("  2. Правильность строки подключения")
@@ -42,13 +42,13 @@ def main():
             print("\nИнструкция: см. SETUP_DATABASE.md")
             sys.exit(1)
         
-        print("✓ Подключение успешно\n")
+        print("[OK] Подключение успешно\n")
         
         # Шаг 2: Создание таблиц
         print("[2/4] Создание таблиц в БД...")
         from db.connection import init_db
         init_db()
-        print("✓ Таблицы созданы\n")
+        print("[OK] Таблицы созданы\n")
         
         # Шаг 3: Загрузка регионов
         print("[3/4] Загрузка справочника регионов...")
@@ -58,7 +58,7 @@ def main():
         db = SessionLocal()
         try:
             load_regions(db)
-            print("✓ Регионы загружены\n")
+            print("[OK] Регионы загружены\n")
         finally:
             db.close()
         
@@ -67,7 +67,7 @@ def main():
         json_path = Path("data/lots_all_20260425_173650.json")
         
         if not json_path.exists():
-            print(f"⚠ Файл {json_path} не найден")
+            print(f"[WARNING] Файл {json_path} не найден")
             print("  Пропускаем загрузку лотов")
             print("  Запустите парсер: python scraper/fetch_lots.py")
         else:
@@ -75,7 +75,7 @@ def main():
             db = SessionLocal()
             try:
                 loaded = load_lots_from_json(str(json_path), db)
-                print(f"✓ Загружено {loaded} лотов\n")
+                print(f"[OK] Загружено {loaded} лотов\n")
             finally:
                 db.close()
         
@@ -88,14 +88,14 @@ def main():
         db = SessionLocal()
         try:
             stats = get_stats(db)
-            print(f"\n  📊 Регионов:    {stats['regions']}")
-            print(f"  🏢 Заказчиков:  {stats['customers']}")
-            print(f"  📦 Лотов:       {stats['lots']}")
+            print(f"\n  Регионов:    {stats['regions']}")
+            print(f"  Заказчиков:  {stats['customers']}")
+            print(f"  Лотов:       {stats['lots']}")
         finally:
             db.close()
         
         print("\n" + "=" * 70)
-        print("  ✅ ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА УСПЕШНО")
+        print("  [SUCCESS] ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА УСПЕШНО")
         print("=" * 70 + "\n")
         
         print("Следующие шаги:")
@@ -107,7 +107,7 @@ def main():
         print()
         
     except Exception as e:
-        print(f"\n❌ ОШИБКА: {e}")
+        print(f"\n[ERROR] {e}")
         logger.exception("Детали ошибки:")
         sys.exit(1)
 

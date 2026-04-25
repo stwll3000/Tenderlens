@@ -32,12 +32,12 @@ if not DATABASE_URL:
     )
 
 # Создание engine с connection pooling
-# Для Supabase рекомендуется использовать NullPool для serverless окружений
+# Для Supabase pooler используем минимальные настройки
 engine = create_engine(
     DATABASE_URL,
-    poolclass=NullPool,  # Отключаем пулинг для Supabase
-    echo=False,  # Установите True для отладки SQL-запросов
-    future=True,
+    poolclass=NullPool,
+    echo=False,
+    pool_pre_ping=False,  # Отключаем pre-ping
 )
 
 # Создание фабрики сессий
@@ -112,8 +112,14 @@ def test_connection() -> bool:
         bool: True если подключение успешно
     """
     try:
-        with engine.connect() as conn:
-            conn.execute("SELECT 1")
+        # Используем прямое подключение через psycopg2 для проверки
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        cur.close()
+        conn.close()
         logger.info("✓ Подключение к БД успешно")
         return True
     except Exception as e:
