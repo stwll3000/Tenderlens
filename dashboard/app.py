@@ -180,7 +180,8 @@ def main():
         with col2:
             st.markdown("**Разброс:**")
             st.write(f"• Стандартное отклонение: {format_price(price_dist['std'])}")
-            st.write(f"• Коэффициент вариации: {price_dist['cv']:.2f}")
+            cv = (price_dist['std'] / price_dist['mean']) if price_dist['mean'] > 0 else 0
+            st.write(f"• Коэффициент вариации: {cv:.2f}")
         
         # График распределения цен
         st.subheader("Распределение начальных цен")
