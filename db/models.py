@@ -95,6 +95,17 @@ class Lot(Base):
     region_code: Mapped[str] = mapped_column(String(2), nullable=False, index=True)
     region_name: Mapped[str] = mapped_column(String(255), nullable=False)
     
+    # Даты закупки
+    published_date: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    updated_date: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    deadline_date: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    
+    # ОКПД2 коды (JSON array as string)
+    okpd2_codes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Конкуренция
+    participants_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    
     # Метаданные
     scraped_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
