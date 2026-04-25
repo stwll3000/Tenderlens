@@ -16,8 +16,18 @@ def load_remaining_lots():
     """Загрузка оставшихся лотов."""
     print("Загрузка оставшихся лотов...")
     
+    # Находим последний файл с данными
+    import glob
+    data_files = sorted(glob.glob("data/lots_all_*.json"))
+    if not data_files:
+        print("[ERROR] Не найдено файлов с данными")
+        return
+    
+    latest_file = data_files[-1]
+    print(f"Загружаем из: {latest_file}")
+    
     # Читаем JSON
-    with open("data/lots_all_20260425_173650.json", 'r', encoding='utf-8') as f:
+    with open(latest_file, 'r', encoding='utf-8') as f:
         lots_data = json.load(f)
     
     print(f"Всего лотов в JSON: {len(lots_data)}")
