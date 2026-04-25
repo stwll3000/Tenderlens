@@ -33,14 +33,21 @@ def load_data() -> pd.DataFrame:
     """Загрузка данных из JSON файла."""
     data_dir = Path(__file__).parent.parent / "data"
     
-    # Ищем последний файл с данными
-    json_files = sorted(data_dir.glob("lots_all_*.json"), reverse=True)
+    # Ищем последний файл с данными (приоритет multi_regions)
+    multi_files = sorted(data_dir.glob("lots_multi_regions_*.json"), reverse=True)
+    all_files = sorted(data_dir.glob("lots_all_*.json"), reverse=True)
+    fast_files = sorted(data_dir.glob("lots_fast_*.json"), reverse=True)
+    
+    # Выбираем самый большой файл
+    json_files = multi_files or fast_files or all_files
     
     if not json_files:
         st.error("Файлы с данными не найдены в директории data/")
         return pd.DataFrame()
     
     latest_file = json_files[0]
+    
+    st.sidebar.info(f"📁 Данные: {latest_file.name}")
     
     with open(latest_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
