@@ -1,0 +1,161 @@
+{
+  "generated_at": "2026-04-26T08:22:01.079914",
+  "total_lots": 150,
+  "data_quality": [
+    {
+      "field": "initial_price",
+      "label": "НМЦ (начальная максимальная цена)",
+      "filled": 150,
+      "total": 150,
+      "pct_filled": 100.0,
+      "pct_missing": 0.0
+    },
+    {
+      "field": "final_price",
+      "label": "Итоговая цена (из протокола)",
+      "filled": 13,
+      "total": 150,
+      "pct_filled": 8.7,
+      "pct_missing": 91.3
+    },
+    {
+      "field": "price_reduction_pct",
+      "label": "Снижение цены α, %",
+      "filled": 13,
+      "total": 150,
+      "pct_filled": 8.7,
+      "pct_missing": 91.3
+    },
+    {
+      "field": "participants_count",
+      "label": "Число участников",
+      "filled": 25,
+      "total": 150,
+      "pct_filled": 16.7,
+      "pct_missing": 83.3
+    },
+    {
+      "field": "okpd2_codes",
+      "label": "ОКПД2 коды",
+      "filled": 150,
+      "total": 150,
+      "pct_filled": 100.0,
+      "pct_missing": 0.0
+    },
+    {
+      "field": "published_date",
+      "label": "Дата публикации",
+      "filled": 150,
+      "total": 150,
+      "pct_filled": 100.0,
+      "pct_missing": 0.0
+    },
+    {
+      "field": "deadline_date",
+      "label": "Дата дедлайна",
+      "filled": 150,
+      "total": 150,
+      "pct_filled": 100.0,
+      "pct_missing": 0.0
+    }
+  ],
+  "price_stats": {
+    "mean": 13690663.899600001,
+    "median": 986570.6799999999,
+    "min": 3000.0,
+    "max": 1000000000.0,
+    "outliers_count": 22
+  },
+  "hhi_customers": 2653.189517255691,
+  "n_eff_customers": 3.7690485112211043,
+  "timing": {
+    "mean_deadline_days": 12.2,
+    "median_deadline_days": 10.0,
+    "avg_timing_signal": 0.88
+  },
+  "rigging": {
+    "flagged_lots": 21,
+    "flagged_pct": 14.000000000000002,
+    "flag_counts": {
+      "no_equivalent": 6,
+      "long_experience_required": 3,
+      "geo_lock": 12
+    }
+  },
+  "profit_score_components_available": 2,
+  "profit_score_components_total": 6,
+  "scorecard": [
+    {
+      "issue": "final_price покрытие (завершённые лоты)",
+      "current": "22%",
+      "target": "≥80%",
+      "gap": "critical"
+    },
+    {
+      "issue": "participants_count (уникальные ИНН)",
+      "current": "0%",
+      "target": "≥80%",
+      "gap": "critical"
+    },
+    {
+      "issue": "Таблица suppliers",
+      "current": "Отсутствует",
+      "target": "Создана и наполнена",
+      "gap": "critical"
+    },
+    {
+      "issue": "Таблица lot_participations",
+      "current": "Отсутствует",
+      "target": "Создана и наполнена",
+      "gap": "critical"
+    },
+    {
+      "issue": "niche_slug на лотах",
+      "current": "0%",
+      "target": "≥95%",
+      "gap": "high"
+    },
+    {
+      "issue": "Price benchmark по нише",
+      "current": "Отсутствует",
+      "target": "Ежедневный расчёт",
+      "gap": "high"
+    },
+    {
+      "issue": "Profit Score",
+      "current": "0% (2/6 компонентов)",
+      "target": "100% активных лотов",
+      "gap": "critical"
+    },
+    {
+      "issue": "HHI по поставщикам",
+      "current": "HHI по заказчикам (неверно)",
+      "target": "HHI по поставщикам + N_eff",
+      "gap": "high"
+    },
+    {
+      "issue": "Spec purity (детектор заточки)",
+      "current": "Частично (object_name)",
+      "target": "object_name + ТЗ текст",
+      "gap": "medium"
+    },
+    {
+      "issue": "Customer health (ИНН)",
+      "current": "ИНН не парсится",
+      "target": "ЕГРЮЛ + РНП + арбитражи",
+      "gap": "high"
+    },
+    {
+      "issue": "Telegram-дайджест",
+      "current": "Отсутствует",
+      "target": "Ежедневно 08:00 МСК",
+      "gap": "medium"
+    },
+    {
+      "issue": "Объём данных",
+      "current": "150 лотов / 3 регионa",
+      "target": "50-100k лотов / 12+ регионов",
+      "gap": "critical"
+    }
+  ]
+}
