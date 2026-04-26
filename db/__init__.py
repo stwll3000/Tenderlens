@@ -2,6 +2,8 @@
 Инициализация пакета db.
 
 Экспортирует основные компоненты для удобного импорта.
+Если DATABASE_URL не задан — модели всё равно доступны,
+но engine/SessionLocal будут None.
 """
 
 from db.models import Base, Region, Customer, Lot
