@@ -37,9 +37,9 @@ engine = create_engine(
     DATABASE_URL,
     poolclass=NullPool,  # Не используем pool, т.к. pooler сам управляет
     echo=False,
+    pool_pre_ping=True,  # Проверка соединения перед использованием
     connect_args={
         "connect_timeout": 10,
-        "options": "-c statement_timeout=30000",  # 30 секунд на запрос
     }
 )
 
